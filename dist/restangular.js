@@ -1,6 +1,6 @@
 /**
  * Restful Resources service for AngularJS apps
- * @version v1.6.1 - 2017-01-06 * @link https://github.com/mgonto/restangular
+ * @version v1.6.2 - 2020-10-05 * @link https://github.com/ronyf/restangular
  * @author Martin Gontovnikas <martin@gon.to>
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */(function(root, factory) {
@@ -37,6 +37,13 @@
         return _.isUndefined(config.absoluteUrl) || _.isNull(config.absoluteUrl) ?
           string && absolutePattern.test(string) :
           config.absoluteUrl;
+      };
+
+      config.isPrimitive = function (val) {
+        if (typeof val === 'object') {
+          return val === null;
+        }
+        return typeof val !== 'function';
       };
 
       config.absoluteUrl = _.isUndefined(config.absoluteUrl) ? true : config.absoluteUrl;
@@ -822,6 +829,10 @@
         urlHandler.setConfig(config);
 
         function restangularizeBase(parent, elem, route, reqParams, fromServer) {
+          if (config.isPrimitive(elem)) {
+            return elem;
+          }
+
           elem[config.restangularFields.route] = route;
           elem[config.restangularFields.getRestangularUrl] = _.bind(urlHandler.fetchUrl, urlHandler, elem);
           elem[config.restangularFields.getRequestedUrl] = _.bind(urlHandler.fetchRequestedUrl, urlHandler, elem);
@@ -1032,6 +1043,10 @@
           var elem = config.onBeforeElemRestangularized(element, false, route);
 
           var localElem = restangularizeBase(parent, elem, route, reqParams, fromServer);
+
+          if (config.isPrimitive(localElem)) {
+            return config.transformElem(localElem, false, route, service, true);
+          }
 
           if (config.useCannonicalId) {
             localElem[config.restangularFields.cannonicalId] = config.getIdFromElem(localElem);
@@ -1277,7 +1292,9 @@
                   fullParams
                 );
 
-                data[config.restangularFields.singleOne] = __this[config.restangularFields.singleOne];
+                if (!config.isPrimitive(elem)) {
+                  data[config.restangularFields.singleOne] = __this[config.restangularFields.singleOne];
+                }
                 resolvePromise(deferred, response, data, filledObject);
               }
 
