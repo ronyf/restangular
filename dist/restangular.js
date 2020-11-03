@@ -1,6 +1,6 @@
 /**
  * Restful Resources service for AngularJS apps
- * @version v1.6.2 - 2020-10-05 * @link https://github.com/ronyf/restangular
+ * @version v1.6.4 - 2020-11-03 * @link https://github.com/ronyf/restangular
  * @author Martin Gontovnikas <martin@gon.to>
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */(function(root, factory) {
@@ -1005,7 +1005,7 @@
           _.each(requestMethods, function(requestFunc, name) {
             var callOperation = name === 'delete' ? 'remove' : name;
             _.each(['do', 'custom'], function(alias) {
-              elem[alias + name.toUpperCase()] = _.bind(requestFunc, elem, callOperation);
+              elem[config.restangularFields[alias + name.toUpperCase()]] = _.bind(requestFunc, elem, callOperation);
             });
           });
           elem[config.restangularFields.customGETLIST] = _.bind(fetchFunction, elem);
@@ -1128,7 +1128,7 @@
         function parseResponse(resData, operation, route, fetchUrl, response, deferred) {
           var data = config.responseExtractor(resData, operation, route, fetchUrl, response, deferred);
           var etag = response.headers('ETag');
-          if (data && etag) {
+          if (data && etag && !config.isPrimitive(data)) {
             data[config.restangularFields.etag] = etag;
           }
           return data;
