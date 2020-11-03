@@ -1123,7 +1123,7 @@
         function parseResponse(resData, operation, route, fetchUrl, response, deferred) {
           var data = config.responseExtractor(resData, operation, route, fetchUrl, response, deferred);
           var etag = response.headers('ETag');
-          if (data && etag) {
+          if (data && etag && !config.isPrimitive(data)) {
             data[config.restangularFields.etag] = etag;
           }
           return data;
